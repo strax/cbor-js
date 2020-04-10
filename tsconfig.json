@@ -11,7 +11,8 @@
     "declaration": true,
     "sourceMap": true,
     "useDefineForClassFields": true,
-    "incremental": true
+    "incremental": true,
+    "tsBuildInfoFile": "tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*.ts"]
 }
