@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "target",
+    "charset": "utf-8",
+    "newLine": "lf",
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "sourceMap": true,
+    "useDefineForClassFields": true,
+    "incremental": true
+  },
+  "include": ["src/**/*.ts"]
+}

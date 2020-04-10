@@ -1,0 +1,26 @@
+{
+  "name": "cbor",
+  "version": "1.0.0",
+  "typings": "target/index.d.ts",
+  "main": "target/index.js",
+  "description": "",
+  "scripts": {
+    "build": "tsc --build .",
+    "test": "jest"
+  },
+  "files": [
+    "target"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^3.8.3",
+    "jest": "25.3.0",
+    "ts-jest": "25.3.1",
+    "@types/jest": "25.2.1",
+    "@types/node": "13.11.1",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.6.2",
+    "fast-check": "1.24.1"
+  }
+}
