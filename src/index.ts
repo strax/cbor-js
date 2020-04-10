@@ -1,17 +1,15 @@
 import { CborEncoder } from "./encoder";
 import { CborDecoder } from "./decoder";
 
-namespace CBOR {
-  const ENCODER = new CborEncoder();
+const ENCODER = new CborEncoder();
 
-  export function decode(input: ArrayBuffer | SharedArrayBuffer): unknown {
-    let decoder = new CborDecoder(input);
-    return decoder.next().value;
-  }
-
-  export function encode(input: unknown): ArrayBuffer {
-    return ENCODER.encode(input);
-  }
+export function decode(input: ArrayBuffer | SharedArrayBuffer): unknown {
+  let decoder = new CborDecoder(input);
+  return decoder.next().value;
 }
 
-export default CBOR;
+export function encode(input: unknown): ArrayBuffer {
+  return ENCODER.encode(input);
+}
+
+export { TaggedValue } from "./tag";

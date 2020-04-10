@@ -2,6 +2,8 @@ import * as Iterator from "./iterators"
 import { bytesToUnsignedBigInt } from "./bigint";
 import { decodeFloat16 } from "./float16";
 import { MAX_U32, MAX_STRING_LENGTH_BIGINT, MAX_SAFE_INTEGER_BIGINT, ITEM_BREAK } from "./constants";
+import { TaggedValue } from "./tag";
+import { assert } from "./utils";
 
 const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
 
@@ -10,9 +12,13 @@ export class CborDecoder implements Iterator<unknown>, Iterable<unknown> {
   #data: DataView;
   #byteOffset: number = 0;
 
-  constructor(bytes: ArrayBuffer | SharedArrayBuffer) {
-    this.#bytes = new Uint8Array(bytes);
-    this.#data = new DataView(bytes);
+  constructor(bytes: ArrayBuffer | SharedArrayBuffer | ArrayBufferView) {
+    if (ArrayBuffer.isView(bytes)) {
+      this.#bytes = new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    } else {
+      this.#bytes = new Uint8Array(bytes);
+    }
+    this.#data = new DataView(this.#bytes.buffer, this.#bytes.byteOffset, this.#bytes.byteLength);
   }
 
   next(): IteratorResult<unknown> {
@@ -303,6 +309,54 @@ export class CborDecoder implements Iterator<unknown>, Iterable<unknown> {
         }
         return -1n - bytesToUnsignedBigInt(inner)
       }
+      case 0xc0:
+      case 0xc6:
+      case 0xc7:
+      case 0xc8:
+      case 0xc9:
+      case 0xca:
+      case 0xcb:
+      case 0xcc:
+      case 0xcd:
+      case 0xce:
+      case 0xcf:
+      case 0xd0:
+      case 0xd1:
+      case 0xd2:
+      case 0xd3:
+      case 0xd4:
+        return this.decodeWithTag(header - 0xc0, this.item())
+      case 0xd8:
+        return this.decodeWithTag(this.uint8(), this.item())
+      case 0xd9:
+        return this.decodeWithTag(this.uint16(), this.item())
+      case 0xda:
+        return this.decodeWithTag(this.uint32(), this.item())
+      case 0xdb:
+        return this.decodeWithTag(Number(this.uint64()), this.item())
+      case 0xe0:
+      case 0xe1:
+      case 0xe2:
+      case 0xe3:
+      case 0xe4:
+      case 0xe5:
+      case 0xe6:
+      case 0xe7:
+      case 0xe8:
+      case 0xe9:
+      case 0xea:
+      case 0xeb:
+      case 0xec:
+      case 0xed:
+      case 0xee:
+      case 0xef:
+      case 0xf0:
+      case 0xf1:
+      case 0xf2:
+      case 0xf3:
+      case 0xf8: // when implemented, should read one byte for the value
+        // TODO: Handle simple value
+        throw new Error(`cannot decode simple value ${header}`)
       // False
       case 0xf4:
         return false;
@@ -325,6 +379,37 @@ export class CborDecoder implements Iterator<unknown>, Iterable<unknown> {
         return ITEM_BREAK;
     }
     return Symbol("NOT_IMPLEMENTED")
+  }
+
+  private decodeWithTag(tag: number, item: unknown) {
+    switch (tag) {
+      // Standard date/time string
+      case 0:
+        assert(typeof item === "string");
+        return new Date(item);
+      case 1:
+        assert(typeof item === "number");
+        return new Date(item);
+      // Handled in main jump table for now
+      case 2:
+      case 3:
+        throw new Error("unreachable");
+      case 4:
+        throw new TypeError("decimal fractions not supported");
+      case 5:
+        throw new TypeError("bigfloats not supported");
+      case 24: {
+        assert(ArrayBuffer.isView(item));
+        let subdecoder = new CborDecoder(item);
+        return subdecoder.next().value
+      }
+      case 32: {
+        assert(typeof item === "string");
+        return new URL(item);
+      }
+      default:
+        throw new TypeError(`tag ${tag} is unknown to this decoder`)
+    }
   }
 
   private uint8() {
