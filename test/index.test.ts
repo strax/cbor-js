@@ -1,4 +1,4 @@
-import CBOR from "..";
+import * as CBOR from "..";
 import fixtures from "./fixtures";
 
 interface Fixture {

@@ -38,8 +38,49 @@ export class CborEncoder {
       return this.encodeByteString(item);
     } else if (Array.isArray(item)) {
       return this.encodeArray(item);
+    } else if (item instanceof Date) {
+      // TODO: When Temporal lands, we can encode Temporal.DateTime as tag 0 and Temporal.Absolute as tag 1
+      return this.encodeWithTag(0, item.toISOString());
+    } else if (item instanceof URL) {
+      return this.encodeWithTag(32, item.toString());
+    } else {
+      throw new Error("Not implemented");
     }
-    throw new Error("Not implemented yet");
+  }
+
+  private encodeWithTag(id: number, value: unknown): ArrayBuffer {
+    assert(Number.isInteger(id) && id >= 0, "tag must be a positive integer");
+    let bcontent = this.encode(value);
+    if (id <= 0x17) {
+      let buffer = new Uint8Array(bcontent.byteLength + 1);
+      buffer[0] = id + 0xc0;
+      buffer.set(new Uint8Array(bcontent), 1);
+      return buffer;
+    } else if (id <= MAX_U8) {
+      let buffer = new Uint8Array(bcontent.byteLength + 2);
+      buffer[0] = 0xd8;
+      buffer[1] = id;
+      buffer.set(new Uint8Array(bcontent), 2);
+      return buffer;
+    } else if (id <= MAX_U16) {
+      let buffer = new Uint8Array(bcontent.byteLength + 3);
+      buffer[0] = 0xd9;
+      new DataView(buffer.buffer).setUint16(1, id, false);
+      buffer.set(new Uint8Array(bcontent), 3);
+      return buffer;
+    } else if (id <= MAX_U32) {
+      let buffer = new Uint8Array(bcontent.byteLength + 5);
+      buffer[0] = 0xda;
+      new DataView(buffer.buffer).setUint32(1, id, false);
+      buffer.set(new Uint8Array(bcontent), 5);
+      return buffer;
+    } else {
+      let buffer = new Uint8Array(bcontent.byteLength + 9);
+      buffer[0] = 0xda;
+      new DataView(buffer.buffer).setBigUint64(1, BigInt(id), false);
+      buffer.set(new Uint8Array(bcontent), 9);
+      return buffer;
+    }
   }
 
   private encodeArray(items: unknown[]): ArrayBuffer {

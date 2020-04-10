@@ -1,3 +1,5 @@
+import { URL } from "url";
+
 export default [
   {
     cbor: "AA==",
@@ -294,7 +296,8 @@ export default [
   {
     cbor: "wHQyMDEzLTAzLTIxVDIwOjA0OjAwWg==",
     hex: "c074323031332d30332d32315432303a30343a30305a",
-    roundtrip: false, // FIXME: enable
+    roundtrip: false,
+    decoded: new Date("2013-03-21T20:04:00Z"),
     diagnostic: '0("2013-03-21T20:04:00Z")'
   },
   {
@@ -318,13 +321,15 @@ export default [
   {
     cbor: "2BhFZElFVEY=",
     hex: "d818456449455446",
-    roundtrip: false, // FIXME: enable
+    roundtrip: false, // FIXME: enable,
+    decoded: "IETF",
     diagnostic: "24(h'6449455446')"
   },
   {
     cbor: "2CB2aHR0cDovL3d3dy5leGFtcGxlLmNvbQ==",
     hex: "d82076687474703a2f2f7777772e6578616d706c652e636f6d",
-    roundtrip: false, // FIXME: enable
+    roundtrip: false, // decodes to http://www.example.com/
+    decoded: new URL("http://www.example.com"),
     diagnostic: '32("http://www.example.com")'
   },
   {
