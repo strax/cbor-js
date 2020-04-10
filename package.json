@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^3.8.3",
+    "typescript": "3.9.0-beta",
     "jest": "25.3.0",
     "ts-jest": "25.3.1",
     "@types/jest": "25.2.1",
