@@ -1,5 +1,5 @@
 {
-  "name": "cbor",
+  "name": "@strax/cbor",
   "version": "0.1.0",
   "typings": "target/index.d.ts",
   "main": "target/index.js",
@@ -11,8 +11,11 @@
   "files": [
     "target"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "email": "sami@samikukkonen.fi",
+    "name": "Sami Kukkonen"
+  },
+  "license": "MIT",
   "devDependencies": {
     "typescript": "3.9.0-beta",
     "jest": "25.3.0",
