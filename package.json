@@ -1,6 +1,6 @@
 {
   "name": "cbor",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "typings": "target/index.d.ts",
   "main": "target/index.js",
   "description": "",
