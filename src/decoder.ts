@@ -2,7 +2,6 @@ import * as Iterator from "./iterators"
 import { bytesToUnsignedBigInt } from "./bigint";
 import { decodeFloat16 } from "./float16";
 import { MAX_U32, MAX_STRING_LENGTH_BIGINT, MAX_SAFE_INTEGER_BIGINT, ITEM_BREAK } from "./constants";
-import { TaggedValue } from "./tag";
 import { assert } from "./utils";
 
 const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });

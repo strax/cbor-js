@@ -9,7 +9,6 @@ function pack(
   sources: Iterable<ArrayBuffer>,
   offset: number = 0
 ): void {
-  let buffer = new Uint8Array(target, offset);
   for (let source of sources) {
     copyInto(target, source, offset);
     offset += source.byteLength;
@@ -18,8 +17,6 @@ function pack(
 
 export class CborEncoder {
   constructor() {}
-
-  private reserve(n: number) {}
 
   encode(item: unknown): ArrayBuffer {
     if (typeof item === "number") {
