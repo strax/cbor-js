@@ -35,6 +35,8 @@ export class CborEncoder {
       return this.encodeByteString(item);
     } else if (Array.isArray(item)) {
       return this.encodeArray(item);
+    } else if (item instanceof Map) {
+      return this.encodeMap(item);
     } else if (item instanceof Date) {
       // TODO: When Temporal lands, we can encode Temporal.DateTime as tag 0 and Temporal.Absolute as tag 1
       return this.encodeWithTag(0, item.toISOString());
@@ -42,6 +44,42 @@ export class CborEncoder {
       return this.encodeWithTag(32, item.toString());
     } else {
       throw new Error("Not implemented");
+    }
+  }
+
+  private encodeMap(map: Map<unknown, unknown>): ArrayBuffer {
+    let pairs = Array.from(map.entries()).map(([key, value]) => [
+      this.encode(key),
+      this.encode(value)
+    ]);
+    let byteLength = pairs.reduce(
+      (acc, [key, value]) => acc + key.byteLength + value.byteLength,
+      0
+    );
+    if (pairs.length <= 0x17) {
+      let bytes = new Uint8Array(new ArrayBuffer(byteLength + 1));
+      bytes[0] = pairs.length + 0xa0;
+      pack(bytes.buffer, pairs.flat(), 1);
+      return bytes.buffer;
+    } else if (pairs.length <= MAX_U8) {
+      let bytes = new Uint8Array(new ArrayBuffer(byteLength + 2));
+      bytes[0] = 0xb8;
+      bytes[1] = pairs.length;
+      pack(bytes.buffer, pairs.flat(), 2);
+      return bytes.buffer;
+    } else if (pairs.length <= MAX_U16) {
+      let bytes = new Uint8Array(new ArrayBuffer(byteLength + 3));
+      bytes[0] = 0xb9;
+      new DataView(bytes.buffer).setUint16(1, pairs.length, false);
+      pack(bytes.buffer, pairs.flat(), 3);
+      return bytes.buffer;
+    } else {
+      // JavaScript arrays have at most (2 ** 32) - 1 === MAX_U32 elements so we do not need to handle encoding for 64-bit array sizes
+      let bytes = new Uint8Array(new ArrayBuffer(byteLength + 4));
+      bytes[0] = 0xba;
+      new DataView(bytes.buffer).setUint32(1, pairs.length, false);
+      pack(bytes.buffer, pairs.flat(), 4);
+      return bytes.buffer;
     }
   }
 
@@ -149,8 +187,18 @@ export class CborEncoder {
       bytes[1] = encoded.byteLength;
       bytes.set(encoded, 2);
       return bytes.buffer;
+    } else if (encoded.byteLength <= MAX_U16) {
+      let bytes = new Uint8Array(encoded.byteLength + 3);
+      bytes[0] = 0x79;
+      new DataView(bytes.buffer).setUint16(1, encoded.byteLength, false);
+      bytes.set(encoded, 3);
+      return bytes.buffer;
     } else {
-      throw new Error("strings longer than 23 bytes are not yet supported");
+      let bytes = new Uint8Array(encoded.byteLength + 5);
+      bytes[0] = 0x7a;
+      new DataView(bytes.buffer).setUint32(1, encoded.byteLength, false);
+      bytes.set(encoded, 5);
+      return bytes.buffer;
     }
   }
 
