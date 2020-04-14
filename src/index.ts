@@ -11,3 +11,5 @@ export function decode(input: ArrayBuffer | SharedArrayBuffer): unknown {
 export function encode(input: unknown): ArrayBuffer {
   return ENCODER.encode(input);
 }
+
+export { TaggedValue } from "./tagged_value";

@@ -3,6 +3,7 @@ import { bytesToUnsignedBigInt } from "./bigint";
 import { decodeFloat16 } from "./float16";
 import { MAX_U32, MAX_STRING_LENGTH_BIGINT, MAX_SAFE_INTEGER_BIGINT, ITEM_BREAK } from "./constants";
 import { assert } from "./utils";
+import { TaggedValue } from "./tagged_value"
 
 const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
 
@@ -416,7 +417,7 @@ export class CborDecoder implements Iterator<unknown>, Iterable<unknown> {
         return Object.fromEntries(item.entries());
       }
       default:
-        throw new Error("TODO");
+        return new TaggedValue(tag, item)
     }
   }
 

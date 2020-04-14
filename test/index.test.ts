@@ -54,3 +54,13 @@ describe("object encoding", () => {
     );
   });
 });
+
+describe("unknown tag during decoding", () => {
+  test("decoding an item tagged with an unknown tag must return a TaggedValue instance", () => {
+    let data = Buffer.from([0xd9, 0xd9, 0xf6, 0xf4]);
+    let value = CBOR.decode(data);
+    expect(value).toBeInstanceOf(CBOR.TaggedValue);
+    expect((value as CBOR.TaggedValue).item).toBe(false);
+    expect((value as CBOR.TaggedValue).tag).toBe(55798);
+  });
+});
