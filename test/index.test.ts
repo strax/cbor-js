@@ -1,5 +1,6 @@
 import * as CBOR from "..";
 import fixtures from "./fixtures";
+import * as FC from "fast-check";
 
 interface Fixture {
   cbor: string;
@@ -37,4 +38,19 @@ describe.each(VECTORS)("#%# 0x%s", (hex, decoded, roundtrip) => {
       expect(Buffer.from(result).toString("hex")).toEqual(data.toString("hex"));
     });
   }
+});
+
+describe("object encoding", () => {
+  test("Serialized plain objects have tag 275", () => {
+    let data = Buffer.from(CBOR.encode({ a: true }));
+    expect(data.slice(0, 3)).toEqual(Buffer.from([0xd9, 0x01, 0x13]));
+  });
+
+  test("JSON-serializable objects are serialized as maps", () => {
+    FC.assert(
+      FC.property(FC.unicodeJsonObject(), obj => {
+        expect(CBOR.decode(CBOR.encode(obj))).toEqual(obj);
+      })
+    );
+  });
 });

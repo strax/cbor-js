@@ -42,9 +42,19 @@ export class CborEncoder {
       return this.encodeWithTag(0, item.toISOString());
     } else if (item instanceof URL) {
       return this.encodeWithTag(32, item.toString());
+    } else if (typeof item === "object") {
+      // Non-null and non-undefined cases are covered above, so the non-null assertion is safe
+      return this.encodeObject(item!);
     } else {
-      throw new Error("Not implemented");
+      throw new TypeError(
+        `Non-serializable value encountered (with type ${typeof item})`
+      );
     }
+  }
+
+  private encodeObject(object: object): ArrayBuffer {
+    // Tag 275 denotes that the map contains only string keys; see https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml
+    return this.encodeWithTag(275, new Map(Object.entries(object)));
   }
 
   private encodeMap(map: Map<unknown, unknown>): ArrayBuffer {

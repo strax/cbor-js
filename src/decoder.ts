@@ -406,8 +406,17 @@ export class CborDecoder implements Iterator<unknown>, Iterable<unknown> {
         assert(typeof item === "string");
         return new URL(item);
       }
+      case 275: {
+        assert(item instanceof Map);
+        for (let key of item.keys()) {
+          if (typeof key !== "string") {
+            throw new TypeError("Map has a non-string key, even though it was tagged as having string keys only");
+          }
+        }
+        return Object.fromEntries(item.entries());
+      }
       default:
-        throw new TypeError(`tag ${tag} is unknown to this decoder`)
+        throw new Error("TODO");
     }
   }
 
